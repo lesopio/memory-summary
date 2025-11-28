@@ -1,0 +1,35 @@
+{
+  "name": "morandi-annotation-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server.js",
+  "server:python": "H:/AI_Project/.venv/Scripts/python.exe server.py",
+    "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
+    "dev:all:python": "concurrently \"npm run server:python\" \"npm run dev\"",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "framer-motion": "^10.16.4",
+    "lucide-react": "^0.263.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "shadcn-ui": "^0.9.5",
+    "tailwind-variants": "^3.1.1",
+    "tailwindcss": "^3.3.3"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.15",
+    "concurrently": "^8.2.2",
+    "postcss": "^8.4.28",
+    "vite": "^5.0.0"
+  }
+}
