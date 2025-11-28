@@ -1,4 +1,5 @@
 # Morandi配色长期语义记忆系统
+![02ad890fde5795aa7068eab8ddbd23e2](https://github.com/user-attachments/assets/66d83127-0368-4c1f-96c0-e1ec4e0b6e0d)
 
 一个支持大模型长期语义记忆的智能对话系统，具有自动记忆摘要生成、向量化存储、语义检索和权重衰减机制。还有好看的配色。
 
