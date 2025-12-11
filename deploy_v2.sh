@@ -23,15 +23,33 @@ sudo apt update
 sudo apt install -y git python3-venv screen curl build-essential libssl-dev
 
 # 2. 克隆仓库
+# 尝试修复 GnuTLS 错误: 临时禁用 SSL 验证
+git config --global http.sslVerify false
+
 if [ -d "$REPO_NAME" ]; then
     echo "⚠️ 仓库已存在，跳过克隆。"
     cd $REPO_NAME
-    git pull
+    # 尝试拉取最新代码
+    if ! git pull; then
+        echo "❌ 警告: git pull 失败，可能是网络问题。尝试使用 http 协议。"
+        # 切换到 http 协议 (如果原始是 https)
+        git remote set-url origin http://github.com/lesopio/$REPO_NAME.git
+        git pull
+        # 恢复 https 协议
+        git remote set-url origin https://github.com/lesopio/$REPO_NAME.git
+    fi
 else
     echo "⬇️ 克隆 GitHub 仓库 lesopio/$REPO_NAME..."
-    git clone https://github.com/lesopio/$REPO_NAME.git
+    # 尝试使用 https 克隆
+    if ! git clone https://github.com/lesopio/$REPO_NAME.git; then
+        echo "❌ 警告: https 克隆失败，尝试使用 http 协议。"
+        git clone http://github.com/lesopio/$REPO_NAME.git
+    fi
     cd $REPO_NAME
 fi
+
+# 恢复 SSL 验证
+git config --global http.sslVerify true
 
 # 3. 配置 API Key
 echo "----------------------------------------------------------------------"
