@@ -17,9 +17,10 @@ echo "🚀 启动 Memory-Summary v2.0 一键部署..."
 echo "----------------------------------------------------------------------"
 
 # 1. 安装必备工具
-echo "✅ 1. 检查并安装必备工具 (git, npm, python3-venv, screen)..."
+echo "✅ 1. 检查并安装必备工具 (git, python3-venv, screen, curl)..."
 sudo apt update
-sudo apt install -y git npm python3-venv screen curl
+# 移除 npm，因为我们将使用 nvm 安装新版本
+sudo apt install -y git python3-venv screen curl build-essential libssl-dev
 
 # 2. 克隆仓库
 if [ -d "$REPO_NAME" ]; then
@@ -59,25 +60,38 @@ LONGCAT_API_KEY=$API_KEY
 PORT=$BACKEND_PORT
 EOF
 
-# 4. 安装 Python 依赖 (使用 venv)
-echo "✅ 4. 安装 Python 依赖..."
+# 4. 安装 Node.js (使用 NVM)
+echo "✅ 4. 安装 Node.js v20 (使用 NVM)..."
+# 安装 NVM
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+# 加载 NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+# 安装并使用 Node.js v20
+nvm install 20
+nvm use 20
+
+# 5. 安装 Node.js 依赖
+echo "✅ 5. 安装 Node.js 依赖..."
+npm install
+
+# 6. 安装 Python 依赖 (使用 venv)
+echo "✅ 6. 安装 Python 依赖..."
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 deactivate
 
-# 5. 安装 Node.js 依赖
-echo "✅ 5. 安装 Node.js 依赖..."
-npm install
-
-# 6. 构建前端生产版本
-echo "✅ 6. 构建前端生产版本..."
+# 7. 构建前端生产版本
+echo "✅ 7. 构建前端生产版本..."
 # 确保 VITE_API_BASE_URL 在构建时被注入
 VITE_API_BASE_URL="http://$SERVER_IP:$BACKEND_PORT" npm run build
 
-# 7. 启动服务 (使用 screen)
-echo "✅ 7. 启动服务 (使用 screen 后台运行)..."
+# 8. 启动服务 (使用 screen)
+echo "✅ 8. 启动服务 (使用 screen 后台运行)..."
 
 # 启动后端
 echo "📡 启动后端 (Flask) 到 screen 会话: memory-backend"
