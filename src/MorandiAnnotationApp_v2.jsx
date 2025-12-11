@@ -34,7 +34,7 @@ export default function MorandiAnnotationApp() {
   const loadPersonas = async () => {
     try {
       setError(null);
-      const res = await fetch('/personas');
+      const res = await fetch(import.meta.env.VITE_API_BASE_URL + '/personas');
       if (!res.ok) throw new Error('加载 Persona 列表失败');
       const data = await res.json();
       setPersonas(data);
@@ -57,9 +57,9 @@ export default function MorandiAnnotationApp() {
   const loadMemories = async (personaId, query = '') => {
     try {
       setMemoryLoading(true);
-      const url = query
+      const url = import.meta.env.VITE_API_BASE_URL + (query
         ? `/memories-live/${personaId}?query=${encodeURIComponent(query)}`
-        : `/memories-live/${personaId}`;
+        : `/memories-live/${personaId}`);
       const res = await fetch(url);
       if (!res.ok) throw new Error('加载记忆失败');
       const data = await res.json();
@@ -74,7 +74,7 @@ export default function MorandiAnnotationApp() {
   const switchModel = async (model) => {
     if (!currentPersona) return;
     try {
-      const res = await fetch('/switch-model', {
+      const res = await fetch(import.meta.env.VITE_API_BASE_URL + '/switch-model', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ persona: currentPersona.id, model }),
@@ -97,7 +97,7 @@ export default function MorandiAnnotationApp() {
       setChatHistory(prev => [...prev, { role: 'user', content: userMessage }]);
       setMessage('');
 
-      const res = await fetch('/chat', {
+      const res = await fetch(import.meta.env.VITE_API_BASE_URL + '/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -206,7 +206,7 @@ export default function MorandiAnnotationApp() {
     if (!confirm('确定要删除这条记忆吗？')) return;
     
     try {
-      const res = await fetch(`/memories/${memoryId}`, {
+      const res = await fetch(import.meta.env.VITE_API_BASE_URL + `/memories/${memoryId}`, {
         method: 'DELETE',
       });
       if (!res.ok) throw new Error('删除记忆失败');
@@ -221,7 +221,7 @@ export default function MorandiAnnotationApp() {
 
   const updateMemory = async (memoryId, newContent) => {
     try {
-      const res = await fetch(`/memories/${memoryId}`, {
+      const res = await fetch(import.meta.env.VITE_API_BASE_URL + `/memories/${memoryId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: newContent }),
@@ -269,7 +269,7 @@ export default function MorandiAnnotationApp() {
   const exportData = async () => {
     try {
       setError(null);
-      const res = await fetch('/export');
+      const res = await fetch(import.meta.env.VITE_API_BASE_URL + '/export');
       if (!res.ok) throw new Error('导出失败');
 
       const blob = await res.blob();
