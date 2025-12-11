@@ -183,6 +183,14 @@ def chat():
     if not persona or not message:
         return jsonify({'error': '缺少必要参数'}), 400
     
+    # 验证 persona ID
+    if not any(p['id'] == persona for p in personas):
+        return jsonify({'error': '无效的 Persona ID'}), 400
+    
+    # 验证消息长度
+    if len(message) > 5000:
+        return jsonify({'error': '消息过长，最多 5000 字符'}), 400
+    
     try:
         # 验证并选择模型
         valid_models = [DEFAULT_MODEL, THINKING_MODEL]
@@ -299,18 +307,13 @@ def chat():
                             full_response = content
                             # 立即把回退内容发送给客户端
                             yield content
-                            chat_sessions[persona].append({
-                                'role': 'assistant',
-                                'content': full_response,
-                                'timestamp': datetime.now().isoformat(),
-                            })
-                            logger.info('[Chat] 非流式回退成功，已发送响应')
                         else:
                             logger.warning('[Chat] 非流式回退也未返回内容')
                     except Exception as e:
                         logger.error(f'[Chat] 非流式回退调用失败: {e}')
-                else:
-                    # 保存 AI 响应
+                
+                # 统一保存 AI 响应（无论是流式还是非流式）
+                if full_response.strip():
                     chat_sessions[persona].append({
                         'role': 'assistant',
                         'content': full_response,
@@ -319,7 +322,7 @@ def chat():
                 
                 # 更新记忆权重（访问相关记忆）
                 for memory in relevant_memories:
-                    memory_manager.update_memory_weight(memory['id'], persona, 0.05)
+                    memory_manager.update_memory_weight(memory['id'], persona, 0.1)  # 增加增量
                 
                 # 在后台生成记忆摘要（异步）
                 def save_memory_async():
@@ -341,7 +344,7 @@ def chat():
                 memory_thread.start()
                 
                 # 定期合并相似记忆（每10轮对话）
-                if len(chat_sessions.get(persona, [])) % 20 == 0:
+                if len(chat_sessions.get(persona, [])) % 10 == 0:
                     memory_manager.merge_similar_memories(persona)
                 
             except Exception as stream_error:
@@ -435,4 +438,6 @@ if __name__ == '__main__':
     else:
         logger.info('✅ API Key 已设置')
     
-    app.run(host='localhost', port=PORT, debug=False)
+    # 根据环境选择绑定地址
+    host = '0.0.0.0' if os.getenv('ENV') == 'production' else 'localhost'
+    app.run(host=host, port=PORT, debug=False)

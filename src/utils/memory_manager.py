@@ -112,17 +112,20 @@ class MemoryManager:
         # 对角色记忆应用衰减
         for persona_id in list(self.memories.keys()):
             memories = self.memories[persona_id]
-            # 过滤掉权重过低的记忆
-            self.memories[persona_id] = [
-                memory for memory in memories
-                if (memory.update({'weight': memory['weight'] * self.decay_factor}) or True) and memory['weight'] >= 0.1
-            ]
+            updated_memories = []
+            for memory in memories:
+                memory['weight'] *= self.decay_factor
+                if memory['weight'] >= 0.1:
+                    updated_memories.append(memory)
+            self.memories[persona_id] = updated_memories
         
         # 对公共记忆应用衰减
-        self.public_memories = [
-            memory for memory in self.public_memories
-            if (memory.update({'weight': memory['weight'] * self.decay_factor}) or True) and memory['weight'] >= 0.1
-        ]
+        updated_public = []
+        for memory in self.public_memories:
+            memory['weight'] *= self.decay_factor
+            if memory['weight'] >= 0.1:
+                updated_public.append(memory)
+        self.public_memories = updated_public
     
     def merge_similar_memories(self, persona_id: int, threshold: float = 0.8):
         """合并相似记忆"""
@@ -178,12 +181,12 @@ class MemoryManager:
         if persona_id in self.memories:
             for memory in self.memories[persona_id]:
                 if memory['id'] == memory_id:
-                    memory['weight'] = min(1.0, memory['weight'] + increment)
+                    memory['weight'] = min(2.0, memory['weight'] + increment)  # 允许权重超过 1.0
                     memory['accessCount'] = memory.get('accessCount', 0) + 1
                     return
         
         for memory in self.public_memories:
             if memory['id'] == memory_id:
-                memory['weight'] = min(1.0, memory['weight'] + increment)
+                memory['weight'] = min(2.0, memory['weight'] + increment)  # 允许权重超过 1.0
                 memory['accessCount'] = memory.get('accessCount', 0) + 1
                 return
