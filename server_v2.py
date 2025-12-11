@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 # 初始化 Flask 应用
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*", "supports_credentials": True}})
 
 PORT = 3001
 
